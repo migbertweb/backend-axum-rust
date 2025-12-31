@@ -1,0 +1,18 @@
+-- Create Users Table
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    hashed_password TEXT NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- Create Tasks Table
+CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT,
+    completed BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    owner_id INTEGER NOT NULL,
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
