@@ -1,29 +1,38 @@
-# Builder stage
-FROM rust:1.92.0-slim-trixie as builder
-
-WORKDIR /usr/src/app
-COPY . .
-
-# Necesario para compilar dependencias native-tls/sqlite si no vienen estáticas
-RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
-
-# Compilar en modo release
-RUN cargo build --release
-
-# Runtime stage
-FROM debian:trixie-slim
-
+# Usamos cargo-chef para optimizar el cache de dependencias
+FROM lukemathwalker/cargo-chef:latest-rust-1.83.0-slim AS chef
 WORKDIR /app
 
-# Instalar dependencias de runtime (openssl, ca-certificates, sqlite3 lib)
+# Stage 1: Planner - Analiza el proyecto para determinar las dependencias
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
+
+# Stage 2: Builder - Compila las dependencias (esta capa se cachea)
+FROM chef AS builder
+COPY --from=planner /app/recipe.json recipe.json
+
+# Instalar dependencias del sistema necesarias para compilar dependencias de Rust
+RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
+
+# "Cook" las dependencias. Si Cargo.toml/Cargo.lock no cambian, esto se recupera del cache de Docker.
+RUN cargo chef cook --release --recipe-path recipe.json
+
+# Ahora copiamos el código real y compilamos la aplicación
+COPY . .
+RUN cargo build --release --bin backend-axum-rust
+
+# Stage 3: Runtime - Imagen final ligera para ejecución
+FROM debian:bookworm-slim AS runtime
+WORKDIR /app
+
+# Instalar dependencias de runtime
 RUN apt-get update && apt-get install -y libssl3 ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # Copiar el binario desde el builder
-COPY --from=builder /usr/src/app/target/release/backend-axum-rust /app/backend-axum-rust
+COPY --from=builder /app/target/release/backend-axum-rust /app/backend-axum-rust
 
-# Copiar migraciones y .env (opcional, mejor inyectar ENV vars en deploy)
+# Copiar recursos necesarios (migraciones, etc.)
 COPY migrations /app/migrations
-# COPY .env /app/.env # En producción, usa variables de entorno reales, no .env file
 
 # Exponer puerto
 EXPOSE 8000
