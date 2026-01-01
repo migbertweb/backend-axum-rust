@@ -1,5 +1,5 @@
 # Builder stage
-FROM rust:1.75-slim-bookworm as builder
+FROM rust:1.92.0-slim-trixie as builder
 
 WORKDIR /usr/src/app
 COPY . .
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/li
 RUN cargo build --release
 
 # Runtime stage
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 WORKDIR /app
 
