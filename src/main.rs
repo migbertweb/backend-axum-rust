@@ -111,11 +111,11 @@ pub fn create_app(pool: sqlx::SqlitePool) -> Router {
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         // Rutas públicas
         .route("/", get(|| async { "Axum Backend is running!" }))
-        .route("/users", post(handlers::auth::register))
+        .route("/users/", post(handlers::auth::register))
         .route("/token", post(handlers::auth::login))
         // Rutas protegidas
-        .route("/tasks", post(handlers::tasks::create_task))
-        .route("/tasks", get(handlers::tasks::get_tasks))
+        .route("/tasks/", post(handlers::tasks::create_task))
+        .route("/tasks/", get(handlers::tasks::get_tasks))
         .route("/tasks/:id", get(handlers::tasks::get_task))
         .route("/tasks/:id", put(handlers::tasks::update_task))
         .route("/tasks/:id", delete(handlers::tasks::delete_task))
