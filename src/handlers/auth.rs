@@ -15,7 +15,7 @@ use crate::{
 
 #[utoipa::path(
     post,
-    path = "/users",
+    path = "/users/",
     request_body = CreateUser,
     responses(
         (status = 201, description = "User created successfully", body = User),
