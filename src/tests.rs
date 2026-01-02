@@ -48,7 +48,7 @@ async fn test_register_user() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/users/")
+                .uri("/users")
                 .header("content-type", "application/json")
                 .body(Body::from(
                     json!({
@@ -79,7 +79,7 @@ async fn test_login_user() {
         .oneshot(
             Request::builder()
                 .method("POST")
-                .uri("/users/")
+                .uri("/users")
                 .header("content-type", "application/json")
                 .body(Body::from(
                     json!({

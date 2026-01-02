@@ -20,7 +20,7 @@ pub struct Pagination {
 
 #[utoipa::path(
     post,
-    path = "/tasks/",
+    path = "/tasks",
     request_body = CreateTask,
     responses(
         (status = 200, description = "Task created successfully", body = Task),
@@ -56,7 +56,7 @@ pub async fn create_task(
 
 #[utoipa::path(
     get,
-    path = "/tasks/",
+    path = "/tasks",
     params(Pagination),
     responses(
         (status = 200, description = "List tasks", body = Vec<Task>),
